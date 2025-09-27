@@ -14,10 +14,34 @@ const app = express();
 
 // Security middleware
 app.use(helmet());
+
+// Cấu hình CORS
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://coin-tiktok-git-master-duclamdevs-projects.vercel.app',
+  'https://coin-tiktok.vercel.app'
+];
+
+// Sử dụng middleware cors với cấu hình tùy chỉnh
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? 'https://your-domain.com' : 'http://localhost:3000',
-  credentials: true
+  origin: function (origin, callback) {
+    // Cho phép request không có origin (vd: mobile apps, curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range']
 }));
+
+// Xử lý preflight request
+app.options('*', cors());
 
 // Rate limiting
 const limiter = rateLimit({
@@ -30,14 +54,7 @@ app.use(limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Cấu hình CORS
-const allowedOrigins = [
-  'http://localhost:3000',
-  'https://coin-tiktok-git-master-duclamdevs-projects.vercel.app',
-  'https://coin-tiktok.vercel.app'
-];
-
-// Middleware CORS
+// Middleware để thêm các header CORS
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
@@ -49,14 +66,17 @@ app.use((req, res, next) => {
   
   // Xử lý preflight request
   if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
+    return res.status(200).end();
   }
   
   next();
 });
 
 // Serve static files from uploads directory
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', (req, res, next) => {
+  res.header('Cross-Origin-Resource-Policy', 'cross-origin');
+  next();
+}, express.static(path.join(__dirname, 'uploads')));
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, {
