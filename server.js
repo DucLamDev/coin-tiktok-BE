@@ -18,8 +18,7 @@ app.use(helmet());
 // Cấu hình CORS
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://coin-tiktok-git-master-duclamdevs-projects.vercel.app',
-  'https://coin-tiktok.vercel.app'
+  'https://coin-tiktok-weld.vercel.app'
 ];
 
 // Sử dụng middleware cors với cấu hình tùy chỉnh
