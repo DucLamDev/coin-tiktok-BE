@@ -30,15 +30,33 @@ app.use(limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files from uploads directory with CORS headers
-app.use('/uploads', (req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
-  res.header('Access-Control-Allow-Origin', 'https://coin-tiktok-git-master-duclamdevs-projects.vercel.app');
-  res.header('Access-Control-Allow-Methods', 'GET');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  res.header('Cross-Origin-Resource-Policy', 'cross-origin');
+// Cấu hình CORS
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://coin-tiktok-git-master-duclamdevs-projects.vercel.app',
+  'https://coin-tiktok.vercel.app'
+];
+
+// Middleware CORS
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  // Xử lý preflight request
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  
   next();
-}, express.static(path.join(__dirname, 'uploads')));
+});
+
+// Serve static files from uploads directory
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, {
