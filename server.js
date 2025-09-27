@@ -33,7 +33,7 @@ app.use(express.urlencoded({ extended: true }));
 // Serve static files from uploads directory with CORS headers
 app.use('/uploads', (req, res, next) => {
   res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
-  res.header('Access-Control-Allow-Origin', 'https://coin-tiktok-git-master-duclamdevs-projects.vercel.app/');
+  res.header('Access-Control-Allow-Origin', 'https://coin-tiktok-git-master-duclamdevs-projects.vercel.app');
   res.header('Access-Control-Allow-Methods', 'GET');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
   res.header('Cross-Origin-Resource-Policy', 'cross-origin');
